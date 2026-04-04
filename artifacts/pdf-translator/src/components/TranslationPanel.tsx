@@ -89,7 +89,7 @@ export function TranslationPanel({
 
         {!isLoading && !error && translation && (
           <div className="prose prose-sm max-w-none text-foreground">
-            <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed break-words bg-transparent p-0 m-0 border-none">
+            <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed break-words bg-transparent p-0 m-0 border-none text-black">
               {translation}
             </pre>
           </div>

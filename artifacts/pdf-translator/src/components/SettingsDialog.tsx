@@ -25,6 +25,7 @@ const POPULAR_LANGUAGES = [
 ];
 
 const SUGGESTED_MODELS = [
+  "gemini-3.1-flash-lite-preview",
   "gemini-2.0-flash-lite",
   "gemini-2.0-flash",
   "gemini-1.5-flash",
@@ -170,7 +171,7 @@ export function SettingsDialog({ isOpen, onClose, settings, onSave, isFirstVisit
                 />
               )}
             </div>
-            <p className="text-xs text-muted-foreground">Default: gemini-2.0-flash-lite (free tier). Models may change over time.</p>
+            <p className="text-xs text-muted-foreground">Default: gemini-3.1-flash-lite-preview (free tier). Models may change over time.</p>
           </div>
 
           <div className="space-y-1.5">

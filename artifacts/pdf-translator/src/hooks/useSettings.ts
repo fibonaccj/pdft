@@ -12,7 +12,7 @@ const DEFAULT_SETTINGS: Settings = {
   apiKey: "",
   sourceLanguage: "Auto Detect",
   targetLanguage: "Vietnamese",
-  model: "gemini-2.0-flash-lite",
+  model: "gemini-3.1-flash-lite-preview",
   notes: "",
 };
 
