@@ -80,7 +80,7 @@ export default function HomePage() {
           </div>
           <div>
             <h1 className="text-sm font-bold text-foreground leading-none">PDF Translator</h1>
-            <p className="text-xs text-muted-foreground mt-0.5">Powered by Gemini AI</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Read Any Book In Any Language With AI</p>
           </div>
         </div>
 

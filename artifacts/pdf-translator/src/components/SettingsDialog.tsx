@@ -188,6 +188,8 @@ export function SettingsDialog({ isOpen, onClose, settings, onSave, isFirstVisit
           <div className="mt-2 rounded-xl border border-border bg-muted/30 overflow-hidden">
             <div className="p-4 text-center">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Support the Author</p>
+              <p className="text-xs text-muted-foreground tracking-wider mb-3">congcuonghero@gmail.com</p>
+              
               <img
                 src="/bnb_qr.jpg"
                 alt="BNB QR Code"
