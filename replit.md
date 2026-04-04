@@ -4,6 +4,20 @@
 
 pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
 
+## Artifacts
+
+### PDF Translator (`artifacts/pdf-translator`)
+- **Type**: React + Vite, frontend-only (no backend required)
+- **Preview path**: `/`
+- **Purpose**: Upload PDF files and translate pages using Gemini AI. Captures the rendered PDF canvas and sends it to Gemini for translation.
+- **Key features**:
+  - First-visit settings dialog with Gemini API key, source/target language, model selection (default: gemini-2.0-flash-lite), and notes
+  - All settings persisted to localStorage (no backend, fully client-side)
+  - Split-screen: PDF viewer (left) with zoom in/out/reset and page navigation, translation output (right)
+  - Centered "Translate" button between panels — captures the PDF canvas and calls Gemini API
+  - Donation section in settings with BNB QR code and wallet address
+- **Dependencies**: `pdfjs-dist` for PDF rendering, Gemini REST API for translation
+
 ## Stack
 
 - **Monorepo tool**: pnpm workspaces
