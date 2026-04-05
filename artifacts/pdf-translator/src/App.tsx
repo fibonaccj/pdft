@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Analytics } from "@vercel/analytics/react";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import HomePage from "@/pages/HomePage";
@@ -11,6 +12,7 @@ function App() {
       <TooltipProvider>
         <HomePage />
         <Toaster />
+        <Analytics />
       </TooltipProvider>
     </QueryClientProvider>
   );
