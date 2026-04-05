@@ -67,7 +67,7 @@ export function SettingsDialog({ isOpen, onClose, settings, onSave, isFirstVisit
                 {isFirstVisit ? "Welcome to PDF Translator" : "Settings"}
               </h2>
               <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
-                Tùy chỉnh ngôn ngữ nguồn/đích, chọn model phù hợp và thêm ghi chú cho bản dịch của bạn.
+              Customize the language source/destination and add notes to your translation.
               </p>
             </div>
             {!isFirstVisit && (

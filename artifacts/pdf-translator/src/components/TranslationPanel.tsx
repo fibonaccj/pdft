@@ -58,7 +58,7 @@ export function TranslationPanel({
             </div>
             <div className="text-center">
               <p className="font-semibold text-foreground text-sm">Translating...</p>
-              <p className="text-xs text-muted-foreground mt-1">Gemini is processing your document</p>
+              <p className="text-xs text-muted-foreground mt-1">AI is processing your document</p>
             </div>
           </div>
         )}
