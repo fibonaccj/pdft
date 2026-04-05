@@ -76,7 +76,7 @@ export function SettingsDialog({ isOpen, onClose, settings, onSave, isFirstVisit
                 {isFirstVisit ? "Welcome to PDF Translator" : "Settings"}
               </h2>
               <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
-                This website lets you use your free Gemini API key to translate PDFs for free. Your API key is stored locally on your device — we never collect or store any customer data.
+                This website lets you use your free Gemini API key to translate PDFs for free. Your API key is stored locally on your device — Avoid using paid accounts, as API keys can be stolen and misused; use a restricted account for safety.
               </p>
             </div>
             {!isFirstVisit && (
