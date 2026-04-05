@@ -36,10 +36,6 @@ export default function HomePage() {
 
   const handleTranslate = useCallback(async () => {
     if (!pdfFile) return;
-    if (!settings.apiKey) {
-      setSettingsOpen(true);
-      return;
-    }
 
     setIsTranslating(true);
     setTranslationError(null);
@@ -54,7 +50,6 @@ export default function HomePage() {
       const imageBase64 = canvas.toDataURL("image/png").split(",")[1];
 
       const result = await translateWithGemini({
-        apiKey: settings.apiKey,
         model: settings.model,
         imageBase64,
         sourceLanguage: settings.sourceLanguage,

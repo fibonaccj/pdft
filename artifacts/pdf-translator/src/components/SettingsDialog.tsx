@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Settings } from "@/hooks/useSettings";
-import { X, Eye, EyeOff, Copy, Check } from "lucide-react";
+import { X, Copy, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const POPULAR_LANGUAGES = [
@@ -43,7 +43,6 @@ interface SettingsDialogProps {
 
 export function SettingsDialog({ isOpen, onClose, settings, onSave, isFirstVisit }: SettingsDialogProps) {
   const [form, setForm] = useState<Settings>(settings);
-  const [showApiKey, setShowApiKey] = useState(false);
   const [copied, setCopied] = useState(false);
   const [customModel, setCustomModel] = useState(false);
 
@@ -76,7 +75,7 @@ export function SettingsDialog({ isOpen, onClose, settings, onSave, isFirstVisit
                 {isFirstVisit ? "Welcome to PDF Translator" : "Settings"}
               </h2>
               <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
-                This website lets you use your free Gemini API key to translate PDFs for free. Your API key is stored locally on your device — Avoid using paid accounts, as API keys can be stolen and misused; use a restricted account for safety.
+                Tùy chỉnh ngôn ngữ nguồn/đích, chọn model phù hợp và thêm ghi chú cho bản dịch của bạn.
               </p>
             </div>
             {!isFirstVisit && (
@@ -88,32 +87,6 @@ export function SettingsDialog({ isOpen, onClose, settings, onSave, isFirstVisit
         </div>
 
         <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
-          <div className="space-y-1.5">
-            <label className="text-sm font-semibold text-foreground">Gemini API Key <span className="text-destructive">*</span></label>
-            <div className="relative">
-              <input
-                type={showApiKey ? "text" : "password"}
-                value={form.apiKey}
-                onChange={(e) => setForm({ ...form, apiKey: e.target.value })}
-                placeholder="AIza..."
-                className="w-full px-3 py-2.5 pr-10 rounded-lg border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring transition-all"
-              />
-              <button
-                type="button"
-                onClick={() => setShowApiKey(!showApiKey)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {showApiKey ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Get your free key at{" "}
-              <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                aistudio.google.com
-              </a>
-            </p>
-          </div>
-
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <label className="text-sm font-semibold text-foreground">Source Language</label>
@@ -223,12 +196,9 @@ export function SettingsDialog({ isOpen, onClose, settings, onSave, isFirstVisit
           )}
           <button
             onClick={handleSave}
-            disabled={!form.apiKey.trim()}
             className={cn(
               "flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all",
-              form.apiKey.trim()
-                ? "bg-primary text-primary-foreground hover:opacity-90 shadow-sm"
-                : "bg-muted text-muted-foreground cursor-not-allowed"
+              "bg-primary text-primary-foreground hover:opacity-90 shadow-sm"
             )}
           >
             {isFirstVisit ? "Get Started" : "Save Settings"}

@@ -64,28 +64,25 @@ pnpm run dev
 
 1. Open the app (http://localhost:5173 or http://localhost:3000)
 2. Click the Settings icon (gear icon in top right)
-3. **Enter your Gemini API Key** 
-   - Get one free at: https://aistudio.google.com/app/apikeys
-4. Select source and target languages
-5. Upload a PDF file
-6. Click the translate button
+3. Select source and target languages
+4. Upload a PDF file
+5. Click the translate button
 
-## Getting a Gemini API Key
+## Gemini API Key
 
-1. Go to https://aistudio.google.com/app/apikeys
-2. Click "Create API key in new project"
-3. Copy the key
-4. Paste it in the Settings dialog
+This app uses a single server-side Gemini API key configured by the owner.
+
+- Local dev (optional): set `GEMINI_API_KEY` in `.env.local` to test the API route with `vercel dev`.
+- Production (Vercel): set `GEMINI_API_KEY` in your Project Settings → Environment Variables.
 
 ---
 
 ## API Key Security
 
 ✅ **Why it's safe:**
-- Your API key is sent directly to the backend (`/api/translate` endpoint)
-- The backend forwards it securely to Google's Gemini API  
-- Your key is **NEVER stored** in localStorage or anywhere else
-- Each translation request uses your temporarily-provided key
+- The API key is stored only on the server (Vercel Environment Variable)
+- It is never exposed to the browser or stored in localStorage
+- Frontend calls your own backend at `/api/translate`; the backend calls Gemini
 
 ---
 
@@ -99,5 +96,5 @@ pnpm run dev
 
 The `/api` folder will automatically be deployed as Vercel Functions.
 
-No environment variables needed - users provide their own API keys when using the app.
+Before using the app, set the `GEMINI_API_KEY` in Project Settings → Environment Variables.
 
