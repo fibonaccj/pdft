@@ -1,6 +1,4 @@
 export interface TranslateOptions {
-  apiKey: string;
-  model: string;
   imageBase64: string;
   sourceLanguage: string;
   targetLanguage: string;
@@ -8,7 +6,7 @@ export interface TranslateOptions {
 }
 
 export async function translateWithGemini(options: TranslateOptions): Promise<string> {
-  const { apiKey, model, imageBase64, sourceLanguage, targetLanguage, notes } = options;
+  const { imageBase64, sourceLanguage, targetLanguage, notes } = options;
 
   const response = await fetch("/api/translate", {
     method: "POST",
@@ -16,8 +14,6 @@ export async function translateWithGemini(options: TranslateOptions): Promise<st
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      apiKey,
-      model,
       imageBase64,
       sourceLanguage,
       targetLanguage,
@@ -27,7 +23,7 @@ export async function translateWithGemini(options: TranslateOptions): Promise<st
 
   if (!response.ok) {
     const errData = await response.json().catch(() => ({}));
-    const message = errData?.error || `API error ${response.status}`;
+    const message = errData?.error || `Server error ${response.status}`;
     throw new Error(message);
   }
 

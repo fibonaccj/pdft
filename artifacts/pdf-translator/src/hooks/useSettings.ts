@@ -1,18 +1,14 @@
 import { useState, useEffect } from "react";
 
 export interface Settings {
-  apiKey: string;
   sourceLanguage: string;
   targetLanguage: string;
-  model: string;
   notes: string;
 }
 
 const DEFAULT_SETTINGS: Settings = {
-  apiKey: "",
   sourceLanguage: "Auto Detect",
   targetLanguage: "Vietnamese",
-  model: "gemini-3.1-flash-lite-preview",
   notes: "",
 };
 
@@ -31,24 +27,22 @@ export function useSettings() {
   });
 
   const [isFirstVisit, setIsFirstVisit] = useState<boolean>(() => {
+    // No longer gating by API key; default to not first visit unless no settings exist
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        const parsed = JSON.parse(stored);
-        return !parsed.apiKey;
+        return false;
       }
     } catch {
     }
-    return true;
+    return false;
   });
 
   const saveSettings = (newSettings: Settings) => {
     setSettings(newSettings);
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newSettings));
-      if (newSettings.apiKey) {
-        setIsFirstVisit(false);
-      }
+      setIsFirstVisit(false);
     } catch {
     }
   };

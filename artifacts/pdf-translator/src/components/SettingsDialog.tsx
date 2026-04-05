@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Settings } from "@/hooks/useSettings";
-import { X, Eye, EyeOff, Copy, Check } from "lucide-react";
+import { X, Copy, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const POPULAR_LANGUAGES = [
@@ -24,14 +24,7 @@ const POPULAR_LANGUAGES = [
   "Hindi",
 ];
 
-const SUGGESTED_MODELS = [
-  "gemini-3.1-flash-lite-preview",
-  "gemini-2.0-flash-lite",
-  "gemini-2.0-flash",
-  "gemini-1.5-flash",
-  "gemini-1.5-flash-8b",
-  "gemini-1.5-pro",
-];
+// Model selection removed; model is configured on the server side.
 
 interface SettingsDialogProps {
   isOpen: boolean;
@@ -43,13 +36,11 @@ interface SettingsDialogProps {
 
 export function SettingsDialog({ isOpen, onClose, settings, onSave, isFirstVisit }: SettingsDialogProps) {
   const [form, setForm] = useState<Settings>(settings);
-  const [showApiKey, setShowApiKey] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [customModel, setCustomModel] = useState(false);
+  const [customModel] = useState(false);
 
   useEffect(() => {
     setForm(settings);
-    setCustomModel(!SUGGESTED_MODELS.includes(settings.model));
   }, [settings, isOpen]);
 
   if (!isOpen) return null;
@@ -76,7 +67,7 @@ export function SettingsDialog({ isOpen, onClose, settings, onSave, isFirstVisit
                 {isFirstVisit ? "Welcome to PDF Translator" : "Settings"}
               </h2>
               <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
-                This website lets you use your free Gemini API key to translate PDFs for free. Your API key is stored locally on your device — we never collect or store any customer data.
+              Customize the language source/destination and add notes to your translation.
               </p>
             </div>
             {!isFirstVisit && (
@@ -88,32 +79,6 @@ export function SettingsDialog({ isOpen, onClose, settings, onSave, isFirstVisit
         </div>
 
         <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
-          <div className="space-y-1.5">
-            <label className="text-sm font-semibold text-foreground">Gemini API Key <span className="text-destructive">*</span></label>
-            <div className="relative">
-              <input
-                type={showApiKey ? "text" : "password"}
-                value={form.apiKey}
-                onChange={(e) => setForm({ ...form, apiKey: e.target.value })}
-                placeholder="AIza..."
-                className="w-full px-3 py-2.5 pr-10 rounded-lg border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring transition-all"
-              />
-              <button
-                type="button"
-                onClick={() => setShowApiKey(!showApiKey)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {showApiKey ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Get your free key at{" "}
-              <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                aistudio.google.com
-              </a>
-            </p>
-          </div>
-
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <label className="text-sm font-semibold text-foreground">Source Language</label>
@@ -141,38 +106,7 @@ export function SettingsDialog({ isOpen, onClose, settings, onSave, isFirstVisit
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <label className="text-sm font-semibold text-foreground">Gemini Model</label>
-            <div className="space-y-2">
-              <select
-                value={customModel ? "__custom__" : form.model}
-                onChange={(e) => {
-                  if (e.target.value === "__custom__") {
-                    setCustomModel(true);
-                  } else {
-                    setCustomModel(false);
-                    setForm({ ...form, model: e.target.value });
-                  }
-                }}
-                className="w-full px-3 py-2.5 rounded-lg border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring transition-all"
-              >
-                {SUGGESTED_MODELS.map((m) => (
-                  <option key={m} value={m}>{m}</option>
-                ))}
-                <option value="__custom__">Custom model...</option>
-              </select>
-              {customModel && (
-                <input
-                  type="text"
-                  value={form.model}
-                  onChange={(e) => setForm({ ...form, model: e.target.value })}
-                  placeholder="e.g. gemini-2.0-flash-lite"
-                  className="w-full px-3 py-2.5 rounded-lg border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring transition-all"
-                />
-              )}
-            </div>
-            <p className="text-xs text-muted-foreground">Default: gemini-3.1-flash-lite-preview (free tier). Models may change over time.</p>
-          </div>
+          {/* Model selection removed from UI */}
 
           <div className="space-y-1.5">
             <label className="text-sm font-semibold text-foreground">Translation Notes (optional)</label>
@@ -223,12 +157,9 @@ export function SettingsDialog({ isOpen, onClose, settings, onSave, isFirstVisit
           )}
           <button
             onClick={handleSave}
-            disabled={!form.apiKey.trim()}
             className={cn(
               "flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all",
-              form.apiKey.trim()
-                ? "bg-primary text-primary-foreground hover:opacity-90 shadow-sm"
-                : "bg-muted text-muted-foreground cursor-not-allowed"
+              "bg-primary text-primary-foreground hover:opacity-90 shadow-sm"
             )}
           >
             {isFirstVisit ? "Get Started" : "Save Settings"}

@@ -1,7 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 interface TranslateRequestBody {
-  apiKey: string;
   model: string;
   imageBase64: string;
   sourceLanguage: string;
@@ -14,10 +13,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { apiKey, model, imageBase64, sourceLanguage, targetLanguage, notes } =
+  const { imageBase64, sourceLanguage, targetLanguage, notes } =
     req.body as TranslateRequestBody;
 
-  if (!apiKey || !model || !imageBase64) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    return res.status(500).json({ error: 'Server misconfiguration: GEMINI_API_KEY is not set' });
+  }
+
+  const model = process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite-preview';
+
+  if (!imageBase64) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
