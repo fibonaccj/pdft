@@ -24,14 +24,7 @@ const POPULAR_LANGUAGES = [
   "Hindi",
 ];
 
-const SUGGESTED_MODELS = [
-  "gemini-3.1-flash-lite-preview",
-  "gemini-2.0-flash-lite",
-  "gemini-2.0-flash",
-  "gemini-1.5-flash",
-  "gemini-1.5-flash-8b",
-  "gemini-1.5-pro",
-];
+// Model selection removed; model is configured on the server side.
 
 interface SettingsDialogProps {
   isOpen: boolean;
@@ -44,11 +37,10 @@ interface SettingsDialogProps {
 export function SettingsDialog({ isOpen, onClose, settings, onSave, isFirstVisit }: SettingsDialogProps) {
   const [form, setForm] = useState<Settings>(settings);
   const [copied, setCopied] = useState(false);
-  const [customModel, setCustomModel] = useState(false);
+  const [customModel] = useState(false);
 
   useEffect(() => {
     setForm(settings);
-    setCustomModel(!SUGGESTED_MODELS.includes(settings.model));
   }, [settings, isOpen]);
 
   if (!isOpen) return null;
@@ -114,38 +106,7 @@ export function SettingsDialog({ isOpen, onClose, settings, onSave, isFirstVisit
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <label className="text-sm font-semibold text-foreground">Gemini Model</label>
-            <div className="space-y-2">
-              <select
-                value={customModel ? "__custom__" : form.model}
-                onChange={(e) => {
-                  if (e.target.value === "__custom__") {
-                    setCustomModel(true);
-                  } else {
-                    setCustomModel(false);
-                    setForm({ ...form, model: e.target.value });
-                  }
-                }}
-                className="w-full px-3 py-2.5 rounded-lg border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring transition-all"
-              >
-                {SUGGESTED_MODELS.map((m) => (
-                  <option key={m} value={m}>{m}</option>
-                ))}
-                <option value="__custom__">Custom model...</option>
-              </select>
-              {customModel && (
-                <input
-                  type="text"
-                  value={form.model}
-                  onChange={(e) => setForm({ ...form, model: e.target.value })}
-                  placeholder="e.g. gemini-2.0-flash-lite"
-                  className="w-full px-3 py-2.5 rounded-lg border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring transition-all"
-                />
-              )}
-            </div>
-            <p className="text-xs text-muted-foreground">Default: gemini-3.1-flash-lite-preview (free tier). Models may change over time.</p>
-          </div>
+          {/* Model selection removed from UI */}
 
           <div className="space-y-1.5">
             <label className="text-sm font-semibold text-foreground">Translation Notes (optional)</label>

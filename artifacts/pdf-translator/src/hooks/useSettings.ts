@@ -3,14 +3,12 @@ import { useState, useEffect } from "react";
 export interface Settings {
   sourceLanguage: string;
   targetLanguage: string;
-  model: string;
   notes: string;
 }
 
 const DEFAULT_SETTINGS: Settings = {
   sourceLanguage: "Auto Detect",
   targetLanguage: "Vietnamese",
-  model: "gemini-3.1-flash-lite-preview",
   notes: "",
 };
 

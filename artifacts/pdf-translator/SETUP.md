@@ -15,6 +15,7 @@ pnpm add -g vercel
 ```
 # .env.local
 GEMINI_API_KEY=your_key_here  # Optional for local dev
+GEMINI_MODEL=gemini-3.1-flash-lite-preview  # Optional for local dev
 ```
 
 ### 3. Run with Vercel CLI
@@ -73,7 +74,7 @@ pnpm run dev
 This app uses a single server-side Gemini API key configured by the owner.
 
 - Local dev (optional): set `GEMINI_API_KEY` in `.env.local` to test the API route with `vercel dev`.
-- Production (Vercel): set `GEMINI_API_KEY` in your Project Settings → Environment Variables.
+- Production (Vercel): set `GEMINI_API_KEY` and `GEMINI_MODEL` in your Project Settings → Environment Variables.
 
 ---
 

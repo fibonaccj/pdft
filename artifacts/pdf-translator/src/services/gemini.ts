@@ -1,5 +1,4 @@
 export interface TranslateOptions {
-  model: string;
   imageBase64: string;
   sourceLanguage: string;
   targetLanguage: string;
@@ -7,7 +6,7 @@ export interface TranslateOptions {
 }
 
 export async function translateWithGemini(options: TranslateOptions): Promise<string> {
-  const { model, imageBase64, sourceLanguage, targetLanguage, notes } = options;
+  const { imageBase64, sourceLanguage, targetLanguage, notes } = options;
 
   const response = await fetch("/api/translate", {
     method: "POST",
@@ -15,7 +14,6 @@ export async function translateWithGemini(options: TranslateOptions): Promise<st
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model,
       imageBase64,
       sourceLanguage,
       targetLanguage,

@@ -50,7 +50,6 @@ export default function HomePage() {
       const imageBase64 = canvas.toDataURL("image/png").split(",")[1];
 
       const result = await translateWithGemini({
-        model: settings.model,
         imageBase64,
         sourceLanguage: settings.sourceLanguage,
         targetLanguage: settings.targetLanguage,
