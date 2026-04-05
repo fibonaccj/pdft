@@ -24,6 +24,7 @@ export function PDFViewer({ file, onPageChange, viewerRef }: PDFViewerProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const renderTaskRef = useRef<pdfjsLib.RenderTask | null>(null);
+  const [pageInput, setPageInput] = useState<string>("1");
 
   useEffect(() => {
     if (!file) return;
@@ -86,6 +87,7 @@ export function PDFViewer({ file, onPageChange, viewerRef }: PDFViewerProps) {
     if (pdfDoc) {
       renderPage(currentPage, pdfDoc, scale);
       onPageChange?.(currentPage);
+      setPageInput(String(currentPage));
     }
   }, [pdfDoc, currentPage, scale, renderPage, onPageChange]);
 
@@ -94,6 +96,16 @@ export function PDFViewer({ file, onPageChange, viewerRef }: PDFViewerProps) {
   const zoomIn = () => setScale((s) => Math.min(3, parseFloat((s + 0.2).toFixed(1))));
   const zoomOut = () => setScale((s) => Math.max(0.4, parseFloat((s - 0.2).toFixed(1))));
   const resetZoom = () => setScale(1.2);
+  const jumpToPage = () => {
+    if (!totalPages) return;
+    const parsed = parseInt(pageInput, 10);
+    if (Number.isNaN(parsed)) {
+      setPageInput(String(currentPage));
+      return;
+    }
+    const clamped = Math.min(Math.max(parsed, 1), totalPages);
+    setCurrentPage(clamped);
+  };
 
   if (!file) {
     return (
@@ -134,9 +146,25 @@ export function PDFViewer({ file, onPageChange, viewerRef }: PDFViewerProps) {
             >
               <ChevronLeft size={15} />
             </button>
-            <span className="text-xs text-foreground font-medium px-1">
-              {currentPage} / {totalPages}
-            </span>
+            <div className="flex items-center gap-1">
+              <input
+                type="number"
+                value={pageInput}
+                onChange={(e) => setPageInput(e.target.value)}
+                onBlur={jumpToPage}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    jumpToPage();
+                  }
+                }}
+                min={1}
+                max={totalPages}
+                className="w-16 px-2 py-1 rounded-md border border-input bg-background text-foreground text-xs focus:outline-none focus:ring-2 focus:ring-ring text-center"
+                aria-label="Current page"
+              />
+              <span className="text-xs text-muted-foreground px-1">/ {totalPages}</span>
+            </div>
             <button
               onClick={goToNext}
               disabled={currentPage >= totalPages}
