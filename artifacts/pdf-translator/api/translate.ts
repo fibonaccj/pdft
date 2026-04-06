@@ -27,16 +27,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
+    
+
   try {
+    const sourceDesc =
+      sourceLanguage === 'Auto Detect' ? 'the detected language' : sourceLanguage;
+
     const systemPrompt = [
       `You are a professional document translator.`,
-      `You will receive a screenshot of a PDF page.`,
-      `Your task is to:`,
-      `1. Extract all text content visible in the image`,
-      `2. Translate the extracted text from ${sourceLanguage === 'Auto Detect' ? 'the detected language' : sourceLanguage} to ${targetLanguage}`,
-      `3. Output ONLY the translated text, preserving the original paragraph structure and line breaks as much as possible`,
-      `4. Do NOT include any explanations, headings, or meta-information — just the translated text`,
-      notes ? `5. Additional instructions: ${notes}` : '',
+      `You will receive a screenshot of a PDF page containing text.`,
+      `Translate ALL visible text from ${sourceDesc} to ${targetLanguage}.`,
+      `Do NOT output the original text.`,
+      `Do NOT output the original text together with the translated text.`,
+      `Preserve the original paragraph structure and line breaks as much as possible.`,
+      notes ? `Additional instructions: ${notes}` : '',
+      `Output format: Return ONLY a single JSON object (no markdown/code block) with exactly: {"translation":"..."}. The value of "translation" may contain newlines.`,
     ]
       .filter(Boolean)
       .join('\n');
@@ -60,7 +65,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         },
       ],
       generationConfig: {
-        temperature: 0.1,
+        temperature: 0.0,
         maxOutputTokens: 8192,
       },
     };
@@ -80,12 +85,49 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    const result = await response.json();
-    const translatedText =
-      result?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      'No translation received';
+        
 
-    return res.status(200).json({ translation: translatedText });
+    const result = await response.json();
+    const rawText: string | undefined =
+      result?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (!rawText) {
+      return res.status(200).json({ translation: 'No translation received' });
+    }
+
+    const cleaned = rawText
+      .replace(/```(?:json)?/g, '')
+      .replace(/```/g, '')
+      .trim();
+
+    let translation: string | undefined;
+
+    // Preferred: strict JSON
+    try {
+      const parsed = JSON.parse(cleaned);
+      if (typeof parsed?.translation === 'string') {
+        translation = parsed.translation;
+      }
+    } catch {
+      // Ignore
+    }
+
+    // Fallback: extract the first JSON object that contains "translation"
+    if (!translation) {
+      const match = cleaned.match(/\{[\s\S]*"translation"\s*:\s*[\s\S]*\}/);
+      if (match) {
+        try {
+          const parsed = JSON.parse(match[0]);
+          if (typeof parsed?.translation === 'string') {
+            translation = parsed.translation;
+          }
+        } catch {
+          // Ignore
+        }
+      }
+    }
+
+    return res.status(200).json({ translation: (translation ?? rawText).trim() });
   } catch (error) {
     console.error('Translation error:', error);
     return res.status(500).json({
