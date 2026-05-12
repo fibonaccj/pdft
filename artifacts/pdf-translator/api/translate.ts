@@ -34,14 +34,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       sourceLanguage === 'Auto Detect' ? 'the detected language' : sourceLanguage;
 
     const systemPrompt = [
-      `You are a professional document translator.`,
-      `You will receive a screenshot of a PDF page containing text.`,
-      `Translate ALL visible text from ${sourceDesc} to ${targetLanguage}.`,
-      `Do NOT output the original text.`,
-      `Do NOT output the original text together with the translated text.`,
-      `Preserve the original paragraph structure and line breaks as much as possible.`,
-      notes ? `Additional instructions: ${notes}` : '',
-      `Output format: Return ONLY a single JSON object (no markdown/code block) with exactly: {"translation":"..."}. The "translation" value must contain ONLY the translated text in ${targetLanguage}. It must NOT include any source-language/original text.`,
+      `Dịch text trong ảnh từ ${sourceDesc} sang ${targetLanguage}.`,
+      `Chỉ trả về bản dịch, không trả về text gốc.`,
+      notes ? `Yêu cầu thêm: ${notes}` : '',
+      `Trả về JSON: {"translation":"bản dịch ở đây"}`,
     ]
       .filter(Boolean)
       .join('\n');
@@ -133,13 +129,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Retry with plain-text-only prompt (some models may not follow the JSON format)
     const plainPrompt = [
-      `You are a professional document translator.`,
-      `Translate ALL visible text from ${sourceDesc} to ${targetLanguage}.`,
-      `Output ONLY the translated text.`,
-      `Do NOT output the original text.`,
-      `Do NOT output both the original and the translated text.`,
-      `Preserve the original paragraph structure and line breaks as much as possible.`,
-      notes ? `Additional instructions: ${notes}` : '',
+      `Dịch text trong ảnh từ ${sourceDesc} sang ${targetLanguage}.`,
+      `Chỉ trả về bản dịch, không trả về text gốc.`,
+      notes ? `Yêu cầu thêm: ${notes}` : '',
     ]
       .filter(Boolean)
       .join('\n');
