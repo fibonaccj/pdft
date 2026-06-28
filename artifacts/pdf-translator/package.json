@@ -78,6 +78,7 @@
     "zod": "catalog:"
   },
   "dependencies": {
+    "@mistralai/mistralai": "^2.3.0",
     "@vercel/analytics": "^2.0.1"
   }
 }
