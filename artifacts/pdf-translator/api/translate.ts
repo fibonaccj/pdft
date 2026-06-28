@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { Mistral } from '@mistralai/mistralai';
 
 interface TranslateRequestBody {
   model: string;
@@ -16,12 +17,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const { imageBase64, sourceLanguage, targetLanguage, notes } =
     req.body as TranslateRequestBody;
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.MISTRAL_API_KEY;
   if (!apiKey) {
-    return res.status(500).json({ error: 'Server misconfiguration: GEMINI_API_KEY is not set' });
+    return res.status(500).json({ error: 'Server misconfiguration: MISTRAL_API_KEY is not set' });
   }
-
-  const model = process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite-preview';
 
   if (!imageBase64) {
     return res.status(400).json({ error: 'Missing required fields' });
@@ -30,68 +29,58 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     
 
   try {
-    const sourceDesc =
-      sourceLanguage === 'Auto Detect' ? 'the detected language' : sourceLanguage;
+    const client = new Mistral({ apiKey });
 
-    const systemPrompt = [
-      `Dịch text trong ảnh từ ${sourceDesc} sang ${targetLanguage}.`,
+    // Bước 1: OCR để trích xuất text từ ảnh
+    const ocrResponse = await client.ocr.process({
+      model: 'mistral-ocr-latest',
+      document: {
+        type: 'image_url',
+        imageUrl: `data:image/png;base64,${imageBase64}`,
+      },
+      includeImageBase64: true,
+    });
+
+    // Trích xuất text từ kết quả OCR
+    const extractedText = ocrResponse.pages
+      ?.map((page) => page.markdown || '')
+      .join('\n') || '';
+
+    if (!extractedText) {
+      return res.status(200).json({ translation: 'No text extracted from image' });
+    }
+
+    // Bước 2: Dịch text với model mistral-small-2506
+    const sourceDesc =
+      sourceLanguage === 'Auto Detect' ? 'ngôn ngữ được phát hiện' : sourceLanguage;
+
+    const translationPrompt = [
+      `Dịch đoạn văn bản sau từ ${sourceDesc} sang ${targetLanguage}.`,
       `Chỉ trả về bản dịch, không trả về text gốc.`,
       notes ? `Yêu cầu thêm: ${notes}` : '',
       `Trả về JSON: {"translation":"bản dịch ở đây"}`,
+      '',
+      'Văn bản cần dịch:',
+      extractedText,
     ]
       .filter(Boolean)
       .join('\n');
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-
-    const body = {
-      contents: [
-        {
-          parts: [
-            {
-              inline_data: {
-                mime_type: 'image/png',
-                data: imageBase64,
-              },
-            },
-            {
-              text: systemPrompt,
-            },
-          ],
-        },
-      ],
-      generationConfig: {
-        temperature: 0.0,
-        maxOutputTokens: 8192,
-      },
-    };
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
+    const chatResponse = await client.chat.complete({
+      model: 'mistral-small-2506',
+      messages: [{ role: 'user', content: translationPrompt }],
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      return res.status(response.status).json({
-        error: error?.error?.message || 'Gemini API error',
-      });
-    }
-
-        
-
-    const result = await response.json();
-    const rawText: string | undefined =
-      result?.candidates?.[0]?.content?.parts?.[0]?.text;
+    const rawText = chatResponse.choices?.[0]?.message?.content;
 
     if (!rawText) {
       return res.status(200).json({ translation: 'No translation received' });
     }
 
-    const cleaned = rawText
+    // Xử lý trường hợp rawText có thể là string hoặc ContentChunk[]
+    const textContent = typeof rawText === 'string' ? rawText : JSON.stringify(rawText);
+
+    const cleaned = textContent
       .replace(/```(?:json)?/g, '')
       .replace(/```/g, '')
       .trim();
@@ -127,58 +116,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(200).json({ translation: translation.trim() });
     }
 
-    // Retry with plain-text-only prompt (some models may not follow the JSON format)
-    const plainPrompt = [
-      `Dịch text trong ảnh từ ${sourceDesc} sang ${targetLanguage}.`,
-      `Chỉ trả về bản dịch, không trả về text gốc.`,
-      notes ? `Yêu cầu thêm: ${notes}` : '',
-    ]
-      .filter(Boolean)
-      .join('\n');
-
-    const retryBody = {
-      contents: [
-        {
-          parts: [
-            {
-              inline_data: {
-                mime_type: 'image/png',
-                data: imageBase64,
-              },
-            },
-            {
-              text: plainPrompt,
-            },
-          ],
-        },
-      ],
-      generationConfig: {
-        temperature: 0.0,
-        maxOutputTokens: 8192,
-      },
-    };
-
-    const retryResponse = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(retryBody),
-    });
-
-    if (!retryResponse.ok) {
-      return res.status(200).json({ translation: 'No translation received' });
-    }
-
-    const retryResult = await retryResponse.json();
-    const rawText2: string | undefined =
-      retryResult?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    if (!rawText2) {
-      return res.status(200).json({ translation: 'No translation received' });
-    }
-
-    return res.status(200).json({ translation: rawText2.trim() });
+    // Fallback: trả về text trực tiếp nếu không parse được JSON
+    return res.status(200).json({ translation: cleaned });
   } catch (error) {
     console.error('Translation error:', error);
     return res.status(500).json({
