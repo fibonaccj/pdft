@@ -31,44 +31,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const client = new Mistral({ apiKey });
 
-    // Bước 1: OCR để trích xuất text từ ảnh
-    const ocrResponse = await client.ocr.process({
-      model: 'mistral-ocr-latest',
-      document: {
-        type: 'image_url',
-        imageUrl: `data:image/png;base64,${imageBase64}`,
-      },
-      includeImageBase64: true,
-    });
-
-    // Trích xuất text từ kết quả OCR
-    const extractedText = ocrResponse.pages
-      ?.map((page) => page.markdown || '')
-      .join('\n') || '';
-
-    if (!extractedText) {
-      return res.status(200).json({ translation: 'No text extracted from image' });
-    }
-
-    // Bước 2: Dịch text với model mistral-small-2506
+    // Sử dụng trực tiếp model mistral-medium-2505 với input image
     const sourceDesc =
       sourceLanguage === 'Auto Detect' ? 'ngôn ngữ được phát hiện' : sourceLanguage;
 
     const translationPrompt = [
-      `Dịch đoạn văn bản sau từ ${sourceDesc} sang ${targetLanguage}.`,
+      `Dịch đoạn văn bản trong hình ảnh từ ${sourceDesc} sang ${targetLanguage}.`,
       `Chỉ trả về bản dịch, không trả về text gốc.`,
       notes ? `Yêu cầu thêm: ${notes}` : '',
       `Trả về JSON: {"translation":"bản dịch ở đây"}`,
-      '',
-      'Văn bản cần dịch:',
-      extractedText,
     ]
       .filter(Boolean)
       .join('\n');
 
     const chatResponse = await client.chat.complete({
-      model: 'mistral-small-2506',
-      messages: [{ role: 'user', content: translationPrompt }],
+      model: 'mistral-medium-2505',
+      messages: [
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: translationPrompt },
+            { type: 'image_url', imageUrl: `data:image/png;base64,${imageBase64}` },
+          ],
+        },
+      ],
     });
 
     const rawText = chatResponse.choices?.[0]?.message?.content;
