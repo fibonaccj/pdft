@@ -9,6 +9,38 @@ interface TranslateRequestBody {
   notes?: string;
 }
 
+function extractTranslationValue(text: string): string | undefined {
+  const keyMatch = /["']?translation["']?\s*:\s*/i.exec(text);
+  if (!keyMatch) return undefined;
+
+  const valueStart = keyMatch.index + keyMatch[0].length;
+  if (text[valueStart] !== '"') return undefined;
+
+  let value = '';
+  let escaped = false;
+
+  for (let index = valueStart + 1; index < text.length; index += 1) {
+    const character = text[index];
+
+    if (escaped) {
+      value += `\\${character}`;
+      escaped = false;
+    } else if (character === '\\') {
+      escaped = true;
+    } else if (character === '"') {
+      try {
+        return JSON.parse(`"${value}"`);
+      } catch {
+        return value.replace(/\\n/g, '\n').replace(/\\r/g, '\r').replace(/\\t/g, '\t').replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+      }
+    } else {
+      value += character;
+    }
+  }
+
+  return undefined;
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -65,8 +97,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(200).json({ translation: 'No translation received' });
     }
 
-    // Xử lý trường hợp rawText có thể là string hoặc ContentChunk[]
-    const textContent = typeof rawText === 'string' ? rawText : JSON.stringify(rawText);
+    const textContent = typeof rawText === 'string'
+      ? rawText
+      : Array.isArray(rawText)
+        ? rawText
+            .map((chunk) => {
+              if (typeof chunk === 'string') return chunk;
+              if (chunk && typeof chunk === 'object' && 'text' in chunk) {
+                return typeof chunk.text === 'string' ? chunk.text : '';
+              }
+              return '';
+            })
+            .join('')
+        : '';
 
     const cleaned = textContent
       .replace(/```(?:json)?/g, '')
@@ -83,6 +126,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     } catch {
       // Ignore
+    }
+
+    if (!translation) {
+      translation = extractTranslationValue(cleaned);
     }
 
     // Fallback: extract the first JSON object that contains "translation"
