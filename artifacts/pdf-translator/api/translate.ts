@@ -65,8 +65,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(200).json({ translation: 'No translation received' });
     }
 
-    // Xử lý trường hợp rawText có thể là string hoặc ContentChunk[]
-    const textContent = typeof rawText === 'string' ? rawText : JSON.stringify(rawText);
+    const textContent = typeof rawText === 'string'
+      ? rawText
+      : Array.isArray(rawText)
+        ? rawText
+            .map((chunk) => {
+              if (typeof chunk === 'string') return chunk;
+              if (chunk && typeof chunk === 'object' && 'text' in chunk) {
+                return typeof chunk.text === 'string' ? chunk.text : '';
+              }
+              return '';
+            })
+            .join('')
+        : '';
 
     const cleaned = textContent
       .replace(/```(?:json)?/g, '')
