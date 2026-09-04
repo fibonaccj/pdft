@@ -31,7 +31,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const client = new Mistral({ apiKey });
 
-    // Sử dụng trực tiếp model mistral-medium-2505 với input image
+    // Lấy model từ biến môi trường MISTRAL_MODEL (đặt trong Vercel),
+    // nếu không có thì dùng mặc định 'mistral-medium-2505'.
+    const model = process.env.MISTRAL_MODEL || 'glm-5-2';
     const sourceDesc =
       sourceLanguage === 'Auto Detect' ? 'ngôn ngữ được phát hiện' : sourceLanguage;
 
@@ -45,7 +47,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .join('\n');
 
     const chatResponse = await client.chat.complete({
-      model: 'mistral-medium-2505',
+      model,
       messages: [
         {
           role: 'user',
